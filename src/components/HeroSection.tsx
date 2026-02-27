@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Upload } from "lucide-react";
+import { ArrowRight, BookOpen, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const stats = [
-  { value: "95%+", label: "Recognition Accuracy" },
-  { value: "<100ms", label: "Response Time" },
-  { value: "100%", label: "Privacy Control" },
+  { value: "95%+", label: "Face Detection Accuracy" },
+  { value: "<100ms", label: "Detection Latency" },
+  { value: "15", label: "Dynamic MCQs" },
   { value: "$0", label: "Cost to Start" },
 ];
 
@@ -25,23 +25,23 @@ const HeroSection = () => {
       >
         <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border/60 bg-secondary/50 px-4 py-2 text-sm text-muted-foreground">
           <span className="text-primary">✦</span>
-          AI-Powered MCQ Interview Coach
+          AI-Powered Proctored MCQ Round
         </div>
 
         <h1 className="section-title !text-5xl md:!text-7xl max-w-4xl leading-tight">
-          Master Your Interview{" "}
+          Ace Your MCQ Round{" "}
           <span className="text-primary italic">with AI</span>
         </h1>
 
         <p className="mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-          Practice proctored MCQ interviews with real-time face detection, dynamic question generation powered by Gemini AI, and get actionable insights to ace your next interview.
+          Practice proctored MCQ rounds with AI-generated questions, real-time face detection via BlazeFace, tab-switch monitoring, and detailed performance analytics — all powered by Gemini AI.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link to="/test">
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-8 font-semibold text-base">
-              <Upload className="h-4 w-4" />
-              Start MCQ Interview
+              <Play className="h-4 w-4" />
+              Start MCQ Round
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
