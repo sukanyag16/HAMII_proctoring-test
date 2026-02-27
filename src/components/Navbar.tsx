@@ -19,7 +19,7 @@ const Navbar = () => {
           </a>
           <Link to="/test">
             <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
-              Start Interview
+              Start MCQ Round
             </Button>
           </Link>
         </div>
