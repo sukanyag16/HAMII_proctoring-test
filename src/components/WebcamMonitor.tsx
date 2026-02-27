@@ -37,7 +37,8 @@ const WebcamMonitor = ({ isActive, onCheatingEvent }: WebcamMonitorProps) => {
 
     const loadFaceDetection = async () => {
       try {
-        const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+        // @ts-ignore - CDN import for MediaPipe
+        const vision = await import(/* @vite-ignore */ "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
         const { FaceDetector, FilesetResolver } = vision;
         const filesetResolver = await FilesetResolver.forVisionTasks(
           "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
