@@ -20,7 +20,7 @@ const TestPage = () => {
   const startTest = () => {
     setPhase("loading");
     try {
-      const generated = generateQuestions(15);
+      const generated = generateQuestions(20);
       setQuestions(generated);
       setAnswers({});
       setCheatingEvents([]);
