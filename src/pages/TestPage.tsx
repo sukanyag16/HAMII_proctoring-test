@@ -68,11 +68,11 @@ const TestPage = () => {
 
     const suggestions = weakTopics.map((topic) => {
       const map: Record<string, string> = {
-        "Data Structures": "Revise Data Structures concepts — focus on trees, graphs, and time complexity",
+        "DSA": "Revise sorting algorithms, trees, graphs, and time complexity analysis",
         "DBMS": "Review DBMS normalization, SQL queries, and transaction concepts",
-        "Operating Systems": "Practice OS concepts — process scheduling, memory management, deadlocks",
-        "Networking": "Study networking protocols — TCP/IP, OSI model, DNS, HTTP",
-        "Programming": "Strengthen programming fundamentals — OOP, recursion, design patterns",
+        "OS": "Practice OS concepts — process scheduling, memory management, deadlocks",
+        "Java": "Strengthen Java fundamentals — OOP, collections, exception handling",
+        "Python": "Review Python basics — data types, list comprehension, decorators",
       };
       return map[topic] || `Review ${topic} concepts`;
     });
