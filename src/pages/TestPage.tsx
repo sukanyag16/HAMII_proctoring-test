@@ -127,7 +127,7 @@ const TestPage = () => {
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-            <p className="mt-4 text-muted-foreground font-display">Generating questions with Gemini AI...</p>
+            <p className="mt-4 text-muted-foreground font-display">Preparing your questions...</p>
           </div>
         </div>
       </div>
