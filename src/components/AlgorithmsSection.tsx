@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import {
-  Brain, Eye, BarChart3, Cpu, MonitorOff, Box, Fingerprint,
-  Timer, ShieldCheck, Layers, Sparkles, GitBranch, Activity,
-  Scan, AlertTriangle, Network
+  Brain, Eye, BarChart3, Timer, ShieldCheck, Layers
 } from "lucide-react";
 
 interface AlgoItem {
@@ -22,147 +20,142 @@ const algorithms: AlgoCategory[] = [
   {
     category: "Question Generation",
     icon: Brain,
-    description: "Dynamic MCQ creation using large language models with structured output control",
+    description: "How we create a fresh set of MCQ questions every time you take a test",
     items: [
       {
-        title: "Gemini 3 Flash (LLM)",
-        tech: "google/gemini-3-flash-preview",
-        desc: "Google's latest multimodal LLM generates 15 unique CS questions per session. High temperature (1.0) ensures maximum variety across runs — no two tests are alike.",
+        title: "Fisher-Yates Shuffle Algorithm",
+        tech: "Random selection without bias",
+        desc: "We use the Fisher-Yates (also called Knuth) shuffle algorithm to randomly pick questions from our bank. It works by going through the list backwards and swapping each item with a randomly chosen earlier item. This guarantees every possible order is equally likely — so you never get the same test twice.",
       },
       {
-        title: "Few-Shot Prompt Engineering",
-        tech: "System + User prompt chain",
-        desc: "Carefully crafted system prompt constrains the model to output pure JSON arrays. The user prompt specifies exact schema (question, options, answer, topic) with topic distribution control across 5 CS domains.",
+        title: "Stratified Sampling",
+        tech: "Equal distribution across topics",
+        desc: "Instead of picking 20 random questions from the entire pool, we divide questions into 5 topic groups (Java, Python, DBMS, OS, DSA) and pick exactly 4 from each. This is called stratified sampling — it ensures every topic is fairly represented in your test, just like how surveys sample from different demographics.",
       },
       {
-        title: "JSON Schema Enforcement",
-        tech: "Runtime validation + cleanup",
-        desc: "Response is sanitized by stripping markdown fences, then parsed with JSON.parse. Each object is validated for required fields (question, 4 options, answer, topic) before being served to the client.",
-      },
-      {
-        title: "Topic Stratification",
-        tech: "Prompt-controlled distribution",
-        desc: "The prompt explicitly lists 5 topics (Data Structures, DBMS, OS, Networking, Programming) ensuring balanced coverage. The LLM distributes ~3 questions per topic for comprehensive assessment.",
+        title: "Local Question Bank",
+        tech: "50 curated questions, zero API calls",
+        desc: "All 50 questions are stored right inside your browser — no internet request is needed to generate a test. This means instant test loading with zero latency. Each topic has 10 questions, giving you 10-choose-4 = 210 possible combinations per topic, and millions of unique test configurations overall.",
       },
     ],
   },
   {
-    category: "Face Detection",
+    category: "Face Detection — BlazeFace Neural Network",
     icon: Eye,
-    description: "Real-time face detection using lightweight neural networks optimized for browser execution",
+    description: "How we detect and track your face in real-time using AI running inside your browser",
     items: [
       {
-        title: "BlazeFace (SSD-based)",
-        tech: "MediaPipe Tasks Vision",
-        desc: "A Single Shot MultiBox Detector (SSD) architecture with a custom encoder optimized for mobile GPUs. Uses a 128×128 input resolution with 6 anchor boxes, achieving sub-10ms inference on modern browsers via WebGL/GPU delegate.",
+        title: "BlazeFace (Single Shot Detector)",
+        tech: "MediaPipe by Google",
+        desc: "BlazeFace is a lightweight neural network designed by Google specifically for detecting faces on mobile devices. It's based on the SSD (Single Shot MultiBox Detector) architecture — meaning it looks at the entire image once and predicts all face locations in a single pass, instead of scanning the image multiple times. This makes it extremely fast (<10ms per frame).",
       },
       {
         title: "WebGL GPU Acceleration",
-        tech: "MediaPipe WASM + WebGL",
-        desc: "The face detector runs on the GPU via WebGL shaders, compiled from MediaPipe's C++ pipeline to WebAssembly. This offloads the neural network computation from the CPU, enabling smooth 30fps detection alongside the webcam feed.",
+        tech: "Hardware-accelerated inference",
+        desc: "The neural network runs directly on your device's GPU (graphics card) using WebGL — the same technology used for 3D games in browsers. This offloads heavy math operations from your CPU, allowing face detection to run at 30+ frames per second without slowing down the rest of the app.",
       },
       {
         title: "Bounding Box Regression",
-        tech: "Canvas 2D overlay rendering",
-        desc: "Each detected face returns a bounding box (originX, originY, width, height) predicted by the SSD's regression head. These coordinates are drawn as rectangles on an HTML Canvas overlaying the video element in real-time.",
+        tech: "Coordinate prediction + Canvas rendering",
+        desc: "For each detected face, the model predicts 4 numbers: x position, y position, width, and height. These form a 'bounding box' — a rectangle around your face. We draw this rectangle on an invisible HTML Canvas layer placed on top of your webcam video, so you can see the detection happening live.",
       },
       {
-        title: "Multi-Face Classification",
-        tech: "Detection count thresholding",
-        desc: "The detector returns an array of all detected faces. If detections.length > 1, the system flags it as a 'multiple faces' cheating event. If detections.length === 0 for more than 3 consecutive seconds, a 'face missing' event is triggered.",
+        title: "Multi-Face Thresholding",
+        tech: "Count-based classification",
+        desc: "After detecting all faces in a frame, we simply count them. If count > 1, it means someone else is visible — flagged as a cheating event. If count === 0 for more than 3 seconds straight, it means you've left the frame. This simple counting rule is surprisingly effective for proctoring.",
       },
     ],
   },
   {
-    category: "Proctoring Engine",
+    category: "Proctoring Engine — Multi-Signal Detection",
     icon: ShieldCheck,
-    description: "Multi-signal cheating detection combining vision, browser APIs, and temporal analysis",
+    description: "How we combine multiple signals to detect suspicious behavior during the test",
     items: [
       {
-        title: "Page Visibility API",
-        tech: "document.visibilitychange",
-        desc: "The browser's native Visibility API fires when the user switches tabs or minimizes the window. Each 'hidden' state transition is captured as a tab_switch event with a timestamp for the integrity audit trail.",
+        title: "Page Visibility API (Browser Event Listener)",
+        tech: "Built-in browser API",
+        desc: "Every modern browser has a built-in feature called the Page Visibility API. It fires an event the moment you switch to another tab, minimize the browser, or open another app. We listen to this event and log every occurrence with a timestamp — there's no way to switch tabs without us knowing.",
       },
       {
-        title: "Temporal Debouncing (Face Missing)",
-        tech: "setTimeout with 3s threshold",
-        desc: "To avoid false positives from brief glances away, face-missing events use a 3-second debounce timer. The timer starts when no face is detected and only fires the event if the face remains absent for the full duration. Timer resets on re-detection.",
-      },
-      {
-        title: "Real-Time Event Stream",
-        tech: "React state with useCallback",
-        desc: "Cheating events are accumulated in a React state array using memoized callbacks (useCallback) to prevent unnecessary re-renders of the webcam component. Events are displayed in a live activity log sidebar.",
+        title: "Debounce Timer (3-Second Threshold)",
+        tech: "setTimeout-based filtering",
+        desc: "If you briefly look away from the screen, the face detector might lose your face for a split second. To avoid false alarms, we use a debounce timer: the 'face missing' alert only fires if your face has been undetected for 3 full seconds. If you look back within 3 seconds, the timer resets and no event is logged.",
       },
       {
         title: "requestAnimationFrame Loop",
-        tech: "Browser rAF scheduling",
-        desc: "Face detection runs in a continuous requestAnimationFrame loop synced to the display refresh rate. Each frame captures the current video frame, runs BlazeFace inference, draws bounding boxes, and evaluates detection counts — all within ~16ms per frame.",
+        tech: "Browser's built-in render scheduler",
+        desc: "Face detection runs inside a requestAnimationFrame (rAF) loop — the browser's native way to run code synced to your screen's refresh rate (usually 60 times per second). Each frame: capture webcam image → run BlazeFace → draw bounding box → check face count. All of this happens in under 16ms per cycle.",
+      },
+      {
+        title: "Event Accumulator Pattern (React useCallback)",
+        tech: "Immutable state updates",
+        desc: "Every cheating event (tab switch, missing face, multiple faces) is added to a growing list stored in React state. We use the useCallback hook to create a stable reference to the event handler, preventing the webcam component from re-rendering unnecessarily every time a new event is added.",
       },
     ],
   },
   {
-    category: "Timer & Auto-Submit",
+    category: "Countdown Timer — setInterval Clock",
     icon: Timer,
-    description: "Countdown-based test control with automatic submission on expiry",
+    description: "How the 15-minute timer works and what happens when it hits zero",
     items: [
       {
-        title: "setInterval Countdown",
-        tech: "1-second tick interval",
-        desc: "A setInterval timer decrements a seconds counter every 1000ms. The timer displays MM:SS format and visually changes to a red warning state when under 2 minutes remaining.",
+        title: "setInterval Countdown (1-Second Tick)",
+        tech: "JavaScript timer API",
+        desc: "A setInterval timer fires a function every 1000 milliseconds (1 second), decrementing a counter each time. The remaining seconds are converted to MM:SS display format. When less than 2 minutes remain, the timer turns red as a visual warning — a simple but effective UX pattern used in exam platforms worldwide.",
       },
       {
-        title: "Auto-Submit on Expiry",
-        tech: "Callback invocation at zero",
-        desc: "When the countdown reaches zero, the interval clears itself and invokes the onTimeUp callback, which triggers the same submission flow as manual submit — ensuring no answers are lost even if the user doesn't click submit.",
+        title: "Auto-Submit on Expiry (Callback Invocation)",
+        tech: "Zero-check trigger",
+        desc: "When the counter reaches exactly zero, the interval clears itself (to stop ticking) and calls the onTimeUp callback function. This triggers the exact same submission logic as clicking the Submit button — meaning your answers are always saved, even if you forget to submit manually.",
       },
     ],
   },
   {
-    category: "Scoring & Evaluation",
+    category: "Scoring — Weighted Penalty System",
     icon: BarChart3,
-    description: "Multi-dimensional assessment combining correctness scoring with integrity analysis",
+    description: "How we calculate your score and integrity rating after the test",
     items: [
       {
-        title: "Weighted Penalty Scoring",
-        tech: "Rule-based deduction system",
-        desc: "Integrity starts at 100 and is reduced per event: -20 for multiple faces (high severity), -10 for tab switches (medium), -5 for face missing (low). Score is clamped to [0, 100]. Pass threshold is ≥ 80.",
+        title: "Weighted Deduction Algorithm",
+        tech: "Severity-based penalty scoring",
+        desc: "Your integrity score starts at 100 and gets reduced based on the severity of each event: Multiple faces detected → −20 points (high severity, likely someone helping). Tab switch → −10 points (medium, possibly looking up answers). Face missing → −5 points (low, could be accidental). The score is clamped to never go below 0. You pass integrity if your score is ≥ 80.",
       },
       {
-        title: "Topic-Based Weakness Analysis",
-        tech: "Grouping + threshold filter",
-        desc: "Answers are grouped by topic. For each topic, a correct/total ratio is computed. Topics with < 50% accuracy are flagged as 'weak areas' and surfaced in the report with specific improvement suggestions.",
+        title: "Topic-Wise Accuracy Analysis (Group-By Aggregation)",
+        tech: "Percentage threshold filter",
+        desc: "After the test, we group your answers by topic and calculate the percentage correct for each. Any topic where you scored below 50% is flagged as a 'weak area.' This is a simple group-by-and-filter operation — the same pattern used in SQL analytics and data science to find underperforming segments.",
       },
       {
-        title: "Mapped Suggestion Engine",
-        tech: "Topic → recommendation lookup",
-        desc: "Each weak topic maps to a pre-defined, actionable suggestion (e.g., 'Data Structures' → 'Revise trees, graphs, and time complexity'). This provides immediately actionable feedback rather than generic advice.",
+        title: "Mapped Recommendation Engine (Lookup Table)",
+        tech: "Topic → suggestion dictionary",
+        desc: "Each weak topic maps to a hand-written, specific suggestion. For example: 'DSA' → 'Revise sorting algorithms, trees, and graph traversals.' This is a simple key-value lookup (hash map), but the suggestions are carefully crafted to be immediately actionable rather than generic advice like 'study more.'",
       },
       {
-        title: "Complete Answer Audit",
+        title: "Full Answer Audit Trail",
         tech: "Question-by-question review",
-        desc: "The results page shows every question with a ✓/✗ indicator, the user's selected answer (highlighted in red if wrong), and the correct answer — enabling detailed self-review after each session.",
+        desc: "The results page displays every question with a ✓ or ✗, your selected answer highlighted in red if wrong, and the correct answer shown in green. This lets you do a complete self-review — understanding exactly what you got wrong and why, which is proven to be more effective for learning than just seeing a final score.",
       },
     ],
   },
   {
-    category: "Architecture & Security",
+    category: "Architecture — Client-Side SPA",
     icon: Layers,
-    description: "Edge-function backend with client-side rendering and zero data persistence",
+    description: "How the entire app is built and why your data never leaves your device",
     items: [
       {
-        title: "Edge Function Backend",
-        tech: "Deno runtime on Lovable Cloud",
-        desc: "Question generation runs server-side in a Deno edge function, keeping the API key secure. The function handles CORS, rate limiting (429), credit exhaustion (402), and response sanitization before returning questions to the client.",
+        title: "Single Page Application (React + Vite)",
+        tech: "Client-side rendering",
+        desc: "The entire app runs as a Single Page Application (SPA) — your browser downloads the app once, and all navigation happens instantly without page reloads. Vite bundles the code using ES modules for fast development builds, and React handles the UI with a virtual DOM for efficient updates.",
       },
       {
-        title: "Zero-Persistence Privacy",
-        tech: "Client-side only state",
-        desc: "Webcam feeds are processed entirely in-browser — no video frames leave the device. Questions, answers, and results exist only in React state and are lost on page refresh. No database storage means complete privacy by design.",
+        title: "Zero-Persistence Privacy Model",
+        tech: "All data stays in browser memory",
+        desc: "Your webcam feed is processed entirely inside your browser — no video frames are ever sent to any server. Questions, answers, scores, and proctoring events all live in React's in-memory state. When you close or refresh the page, everything is gone. No database, no cookies, no tracking — privacy by design.",
       },
       {
-        title: "Client-Side Routing",
-        tech: "React Router with state passing",
-        desc: "Test results are passed to the results page via React Router's location state, avoiding URL parameters or API calls. This keeps the entire flow client-side with instant page transitions.",
+        title: "React Router State Transfer",
+        tech: "In-memory navigation state",
+        desc: "When you finish the test, your results are passed to the results page using React Router's location state — an in-memory object attached to the navigation event. This avoids putting sensitive data in the URL or making API calls. The data exists only during the navigation and disappears on page refresh.",
       },
     ],
   },
@@ -177,7 +170,7 @@ const AlgorithmsSection = () => {
             The <span className="text-primary">Algorithms</span> Behind the Magic
           </h2>
           <p className="section-subtitle mt-4">
-            A deep dive into every algorithm and technique powering your proctored MCQ round
+            Every algorithm explained in simple language — understand exactly how your proctored MCQ round works under the hood
           </p>
         </div>
 

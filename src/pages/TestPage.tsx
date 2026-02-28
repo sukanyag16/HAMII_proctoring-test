@@ -103,7 +103,7 @@ const TestPage = () => {
             </div>
             <h2 className="font-display text-2xl font-bold text-foreground">MCQ Interview Test</h2>
             <p className="text-muted-foreground mt-3 text-sm">
-              15 AI-generated questions • 15 minutes • Proctored with webcam
+              20 topic-wise questions • 15 minutes • Proctored with webcam
             </p>
             <ul className="text-left text-sm text-muted-foreground mt-6 space-y-2">
               <li className="flex items-center gap-2"><span className="text-primary">✓</span> Webcam will be enabled automatically</li>
