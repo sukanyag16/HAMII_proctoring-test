@@ -17,19 +17,15 @@ const TestPage = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [cheatingEvents, setCheatingEvents] = useState<CheatingEvent[]>([]);
 
-  const startTest = async () => {
+  const startTest = () => {
     setPhase("loading");
     try {
-      const { data, error } = await supabase.functions.invoke("generate-mcq", {
-        body: {},
-      });
-      if (error) throw error;
-      if (!data?.questions || !Array.isArray(data.questions)) throw new Error("Invalid response");
-      setQuestions(data.questions);
+      const generated = generateQuestions(15);
+      setQuestions(generated);
       setAnswers({});
       setCheatingEvents([]);
-      setPhase("active");
-    } catch (err: any) {
+      setTimeout(() => setPhase("active"), 800); // brief loading feel
+    } catch (err) {
       console.error("Failed to generate questions:", err);
       toast.error("Failed to generate questions. Please try again.");
       setPhase("idle");
