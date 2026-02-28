@@ -20,7 +20,7 @@ const TestPage = () => {
   const startTest = () => {
     setPhase("loading");
     try {
-      const generated = generateQuestions(15);
+      const generated = generateQuestions(20);
       setQuestions(generated);
       setAnswers({});
       setCheatingEvents([]);
@@ -68,11 +68,11 @@ const TestPage = () => {
 
     const suggestions = weakTopics.map((topic) => {
       const map: Record<string, string> = {
-        "Data Structures": "Revise Data Structures concepts — focus on trees, graphs, and time complexity",
+        "DSA": "Revise sorting algorithms, trees, graphs, and time complexity analysis",
         "DBMS": "Review DBMS normalization, SQL queries, and transaction concepts",
-        "Operating Systems": "Practice OS concepts — process scheduling, memory management, deadlocks",
-        "Networking": "Study networking protocols — TCP/IP, OSI model, DNS, HTTP",
-        "Programming": "Strengthen programming fundamentals — OOP, recursion, design patterns",
+        "OS": "Practice OS concepts — process scheduling, memory management, deadlocks",
+        "Java": "Strengthen Java fundamentals — OOP, collections, exception handling",
+        "Python": "Review Python basics — data types, list comprehension, decorators",
       };
       return map[topic] || `Review ${topic} concepts`;
     });
@@ -103,7 +103,7 @@ const TestPage = () => {
             </div>
             <h2 className="font-display text-2xl font-bold text-foreground">MCQ Interview Test</h2>
             <p className="text-muted-foreground mt-3 text-sm">
-              15 AI-generated questions • 15 minutes • Proctored with webcam
+              20 topic-wise questions • 15 minutes • Proctored with webcam
             </p>
             <ul className="text-left text-sm text-muted-foreground mt-6 space-y-2">
               <li className="flex items-center gap-2"><span className="text-primary">✓</span> Webcam will be enabled automatically</li>
