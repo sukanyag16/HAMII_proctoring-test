@@ -32,11 +32,6 @@ const algorithms: AlgoCategory[] = [
         tech: "Equal distribution across topics",
         desc: "Instead of picking 20 random questions from the entire pool, we divide questions into 5 topic groups (Java, Python, DBMS, OS, DSA) and pick exactly 4 from each. This is called stratified sampling — it ensures every topic is fairly represented in your test, just like how surveys sample from different demographics.",
       },
-      {
-        title: "Local Question Bank",
-        tech: "50 curated questions, zero API calls",
-        desc: "All 50 questions are stored right inside your browser — no internet request is needed to generate a test. This means instant test loading with zero latency. Each topic has 10 questions, giving you 10-choose-4 = 210 possible combinations per topic, and millions of unique test configurations overall.",
-      },
     ],
   },
   {
