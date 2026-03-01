@@ -45,12 +45,17 @@ const TestPage = () => {
 
     questions.forEach((q, i) => {
       const topic = q.topic;
-      if (!topicResults[topic]) topicResults[topic] = { correct: 0, total: 0 };
+      if (!topicResults[topic]) topicResults[topic] = { correct: 0, total: 0, accuracy: 0 };
       topicResults[topic].total++;
       if (answers[i] === q.answer) {
         score++;
         topicResults[topic].correct++;
       }
+    });
+
+    // Calculate accuracy per topic
+    Object.values(topicResults).forEach((r) => {
+      r.accuracy = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
     });
 
     // Integrity calculation
