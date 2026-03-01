@@ -41,7 +41,7 @@ const TestPage = () => {
     setPhase("submitting");
 
     let score = 0;
-    const topicResults: Record<string, { correct: number; total: number }> = {};
+    const topicResults: Record<string, TopicResult> = {};
 
     questions.forEach((q, i) => {
       const topic = q.topic;
