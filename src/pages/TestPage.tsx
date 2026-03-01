@@ -92,6 +92,7 @@ const TestPage = () => {
       answers,
       questions,
       cheatingEvents,
+      topicResults,
     };
 
     navigate("/results", { state: { result } });
