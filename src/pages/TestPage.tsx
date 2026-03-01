@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Brain, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MCQQuestion, CheatingEvent, TestResult } from "@/lib/types";
+import { MCQQuestion, CheatingEvent, TestResult, TopicResult } from "@/lib/types";
 import { generateQuestions } from "@/lib/questionBank";
 import QuestionCard from "@/components/QuestionCard";
 import WebcamMonitor from "@/components/WebcamMonitor";
