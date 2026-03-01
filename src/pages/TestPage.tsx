@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Brain, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MCQQuestion, CheatingEvent, TestResult } from "@/lib/types";
+import { MCQQuestion, CheatingEvent, TestResult, TopicResult } from "@/lib/types";
 import { generateQuestions } from "@/lib/questionBank";
 import QuestionCard from "@/components/QuestionCard";
 import WebcamMonitor from "@/components/WebcamMonitor";
@@ -41,16 +41,21 @@ const TestPage = () => {
     setPhase("submitting");
 
     let score = 0;
-    const topicResults: Record<string, { correct: number; total: number }> = {};
+    const topicResults: Record<string, TopicResult> = {};
 
     questions.forEach((q, i) => {
       const topic = q.topic;
-      if (!topicResults[topic]) topicResults[topic] = { correct: 0, total: 0 };
+      if (!topicResults[topic]) topicResults[topic] = { correct: 0, total: 0, accuracy: 0 };
       topicResults[topic].total++;
       if (answers[i] === q.answer) {
         score++;
         topicResults[topic].correct++;
       }
+    });
+
+    // Calculate accuracy per topic
+    Object.values(topicResults).forEach((r) => {
+      r.accuracy = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
     });
 
     // Integrity calculation
@@ -87,6 +92,7 @@ const TestPage = () => {
       answers,
       questions,
       cheatingEvents,
+      topicResults,
     };
 
     navigate("/results", { state: { result } });

@@ -10,6 +10,12 @@ export interface CheatingEvent {
   timestamp: number;
 }
 
+export interface TopicResult {
+  correct: number;
+  total: number;
+  accuracy: number;
+}
+
 export interface TestResult {
   score: number;
   total: number;
@@ -20,4 +26,5 @@ export interface TestResult {
   answers: Record<number, string>;
   questions: MCQQuestion[];
   cheatingEvents: CheatingEvent[];
+  topicResults: Record<string, TopicResult>;
 }
