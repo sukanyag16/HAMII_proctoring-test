@@ -3,7 +3,7 @@ import { TestResult } from "@/lib/types";
 import { motion } from "framer-motion";
 import {
   CheckCircle, XCircle, Shield, Brain, ArrowLeft,
-  BarChart3, Lightbulb, Download, TrendingUp, Target, AlertTriangle
+  BarChart3, Lightbulb, Download, TrendingUp, Target, AlertTriangle, Eye, UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -53,6 +53,7 @@ const ResultsPage = () => {
     .map(([t]) => t);
 
   const summary = generateSummary(result, percentage, strongTopics);
+  const behavioralFeedback = generateBehavioralFeedback(result);
 
   const downloadPDF = () => {
     const doc = new jsPDF();
@@ -69,104 +70,91 @@ const ResultsPage = () => {
     doc.setFont("helvetica", "normal");
     doc.text(`Generated: ${new Date().toLocaleDateString("en-US", { dateStyle: "long" })}`, 14, 32);
 
-    // Score section
     let y = 52;
-    doc.setTextColor(40);
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("Test Results Overview", 14, y);
-    y += 10;
+    const addSection = (title: string) => {
+      if (y > 250) { doc.addPage(); y = 20; }
+      doc.setTextColor(40);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(title, 14, y);
+      y += 8;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+    };
 
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Score: ${result.score} / ${result.total} (${percentage}%)`, 14, y);
-    y += 7;
-    doc.text(`Integrity Score: ${result.integrityScore}/100 — ${result.integrityStatus}`, 14, y);
-    y += 7;
-    doc.text(`Correct Answers: ${result.score}  |  Incorrect Answers: ${incorrect}`, 14, y);
-    y += 14;
+    // 1. Candidate Performance Summary
+    addSection("1. Candidate Performance Summary");
+    const summaryLines = doc.splitTextToSize(summary, pageWidth - 28);
+    doc.text(summaryLines, 14, y);
+    y += summaryLines.length * 5 + 8;
 
-    // Topic-wise table
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Topic-wise Performance", 14, y);
+    // 2. Score and Accuracy
+    addSection("2. Score and Accuracy");
+    doc.text(`Score: ${result.score} / ${result.total}`, 18, y); y += 6;
+    doc.text(`Accuracy: ${percentage}%`, 18, y); y += 6;
+    doc.text(`Correct Answers: ${result.score}  |  Incorrect Answers: ${incorrect}`, 18, y); y += 10;
+
+    // 3. Integrity Analysis
+    addSection("3. Integrity Analysis");
+    doc.text(`Integrity Score: ${result.integrityScore}/100 — ${result.integrityStatus}`, 18, y); y += 6;
+    if (result.behavioralMetrics) {
+      doc.text(`Eye Contact Score: ${result.behavioralMetrics.eyeContactScore}%`, 18, y); y += 6;
+    }
+    const tabSwitches = result.cheatingEvents.filter((e) => e.type === "tab_switch").length;
+    const multiFaces = result.cheatingEvents.filter((e) => e.type === "multiple_faces").length;
+    const faceMissing = result.cheatingEvents.filter((e) => e.type === "face_missing").length;
+    const lookingAway = result.cheatingEvents.filter((e) => e.type === "looking_away").length;
+    if (tabSwitches > 0) { doc.text(`• Tab Switches: ${tabSwitches} (-10 each)`, 22, y); y += 6; }
+    if (multiFaces > 0) { doc.text(`• Multiple Faces: ${multiFaces} (-20 each)`, 22, y); y += 6; }
+    if (faceMissing > 0) { doc.text(`• Face Missing: ${faceMissing} (-5 each)`, 22, y); y += 6; }
+    if (lookingAway > 0) { doc.text(`• Looking Away: ${lookingAway} (-5 each)`, 22, y); y += 6; }
     y += 4;
 
+    // 4. Topic-wise Performance
+    addSection("4. Topic-wise Performance");
     autoTable(doc, {
       startY: y,
       head: [["Topic", "Correct", "Total", "Accuracy", "Status"]],
       body: topicData.map((t) => [
-        t.topic,
-        String(t.correct),
-        String(t.total),
-        `${t.accuracy}%`,
-        t.accuracy >= 50 ? "Strong" : "Weak",
+        t.topic, String(t.correct), String(t.total), `${t.accuracy}%`,
+        t.accuracy >= 50 ? "✓ Strong" : "✗ Weak",
       ]),
       theme: "grid",
       headStyles: { fillColor: [30, 40, 55], textColor: 255 },
       styles: { fontSize: 10 },
     });
+    y = (doc as any).lastAutoTable.finalY + 10;
 
-    y = (doc as any).lastAutoTable.finalY + 12;
-
-    // Weak areas
+    // 5. Weak Areas
     if (result.weakTopics.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Areas for Improvement", 14, y);
-      y += 8;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
+      addSection("5. Weak Areas");
       result.weakTopics.forEach((topic) => {
-        doc.text(`• ${topic}`, 18, y);
-        y += 6;
+        doc.text(`• ${topic}`, 22, y); y += 6;
       });
       y += 4;
     }
 
-    // Suggestions
+    // 6. Improvement Suggestions
     if (result.suggestions.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Improvement Suggestions", 14, y);
-      y += 8;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
+      addSection("6. Improvement Suggestions");
       result.suggestions.forEach((s) => {
-        const lines = doc.splitTextToSize(`→ ${s}`, pageWidth - 32);
-        doc.text(lines, 18, y);
+        const lines = doc.splitTextToSize(`• ${s}`, pageWidth - 36);
+        if (y + lines.length * 5 > 270) { doc.addPage(); y = 20; }
+        doc.text(lines, 22, y);
         y += lines.length * 5 + 2;
       });
       y += 4;
     }
 
-    // Summary
-    if (y > 250) { doc.addPage(); y = 20; }
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Performance Summary", 14, y);
-    y += 8;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    const summaryLines = doc.splitTextToSize(summary, pageWidth - 28);
-    doc.text(summaryLines, 14, y);
-
-    // Integrity events
-    if (result.cheatingEvents.length > 0) {
-      y += summaryLines.length * 5 + 10;
-      if (y > 260) { doc.addPage(); y = 20; }
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Integrity Events", 14, y);
-      y += 8;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      const tabSwitches = result.cheatingEvents.filter((e) => e.type === "tab_switch").length;
-      const multiFaces = result.cheatingEvents.filter((e) => e.type === "multiple_faces").length;
-      const faceMissing = result.cheatingEvents.filter((e) => e.type === "face_missing").length;
-      if (tabSwitches > 0) { doc.text(`• Tab Switches: ${tabSwitches} (-10 each)`, 18, y); y += 6; }
-      if (multiFaces > 0) { doc.text(`• Multiple Faces: ${multiFaces} (-20 each)`, 18, y); y += 6; }
-      if (faceMissing > 0) { doc.text(`• Face Missing: ${faceMissing} (-5 each)`, 18, y); y += 6; }
+    // 7. Behavioral Feedback
+    if (behavioralFeedback.length > 0) {
+      addSection("7. Behavioral Feedback");
+      behavioralFeedback.forEach((s) => {
+        const lines = doc.splitTextToSize(`• ${s}`, pageWidth - 36);
+        if (y + lines.length * 5 > 270) { doc.addPage(); y = 20; }
+        doc.text(lines, 22, y);
+        y += lines.length * 5 + 2;
+      });
     }
 
     doc.save("HAMII_Performance_Report.pdf");
@@ -200,7 +188,6 @@ const ResultsPage = () => {
 
             {/* Charts Row */}
             <div className="grid md:grid-cols-2 gap-6 mb-6">
-              {/* Bar Chart - Topic Accuracy */}
               <div className="glass-card p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <BarChart3 className="h-5 w-5 text-primary" />
@@ -229,7 +216,6 @@ const ResultsPage = () => {
                 </ResponsiveContainer>
               </div>
 
-              {/* Pie Chart */}
               <div className="glass-card p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Target className="h-5 w-5 text-primary" />
@@ -237,31 +223,14 @@ const ResultsPage = () => {
                 </div>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={90}
-                      paddingAngle={4}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                    >
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={4} dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}>
                       {pieData.map((_, idx) => (
                         <Cell key={idx} fill={PIE_COLORS[idx]} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(220, 18%, 10%)",
-                        border: "1px solid hsl(220, 14%, 18%)",
-                        borderRadius: "8px",
-                        color: "hsl(210, 20%, 92%)",
-                      }}
-                    />
-                    <Legend
-                      formatter={(value) => <span style={{ color: "hsl(210, 20%, 92%)" }}>{value}</span>}
-                    />
+                    <Tooltip contentStyle={{ backgroundColor: "hsl(220, 18%, 10%)", border: "1px solid hsl(220, 14%, 18%)", borderRadius: "8px", color: "hsl(210, 20%, 92%)" }} />
+                    <Legend formatter={(value) => <span style={{ color: "hsl(210, 20%, 92%)" }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -282,9 +251,10 @@ const ResultsPage = () => {
               {result.cheatingEvents.length > 0 && (
                 <div className="mt-4 space-y-1">
                   {[
-                    { type: "tab_switch", label: "Tab switches", penalty: "-10 each" },
-                    { type: "multiple_faces", label: "Multiple faces", penalty: "-20 each" },
-                    { type: "face_missing", label: "Face missing", penalty: "-5 each" },
+                    { type: "tab_switch" as const, label: "Tab switches", penalty: "-10 each" },
+                    { type: "multiple_faces" as const, label: "Multiple faces", penalty: "-20 each" },
+                    { type: "face_missing" as const, label: "Face missing", penalty: "-5 each" },
+                    { type: "looking_away" as const, label: "Looking away", penalty: "-5 each" },
                   ].map(({ type, label, penalty }) => {
                     const count = result.cheatingEvents.filter((e) => e.type === type).length;
                     if (count === 0) return null;
@@ -295,6 +265,18 @@ const ResultsPage = () => {
                       </div>
                     );
                   })}
+                </div>
+              )}
+              {result.behavioralMetrics && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Eye className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Eye Contact Score</span>
+                    <span className={`ml-auto text-sm font-semibold ${result.behavioralMetrics.eyeContactScore >= 60 ? "text-success" : "text-destructive"}`}>
+                      {result.behavioralMetrics.eyeContactScore}%
+                    </span>
+                  </div>
+                  <Progress value={result.behavioralMetrics.eyeContactScore} className="h-2" />
                 </div>
               )}
             </div>
@@ -334,17 +316,54 @@ const ResultsPage = () => {
               <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
             </div>
 
-            {/* Suggestions */}
-            {result.suggestions.length > 0 && (
+            {/* Weak Areas & Suggestions */}
+            {(result.weakTopics.length > 0 || result.suggestions.length > 0) && (
+              <div className="glass-card p-6 mb-6">
+                {result.weakTopics.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      <h3 className="font-display text-lg font-semibold text-foreground">Weak Areas</h3>
+                    </div>
+                    <ul className="space-y-1 ml-2">
+                      {result.weakTopics.map((t, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm text-destructive">
+                          <span>•</span> {t}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {result.suggestions.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Lightbulb className="h-5 w-5 text-warning" />
+                      <h3 className="font-display text-lg font-semibold text-foreground">Improvement Suggestions</h3>
+                    </div>
+                    <ul className="space-y-2 ml-2">
+                      {result.suggestions.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <span className="text-primary mt-0.5">•</span>
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Behavioral Feedback */}
+            {behavioralFeedback.length > 0 && (
               <div className="glass-card p-6 mb-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Lightbulb className="h-5 w-5 text-warning" />
-                  <h3 className="font-display text-lg font-semibold text-foreground">Improvement Suggestions</h3>
+                  <UserCheck className="h-5 w-5 text-primary" />
+                  <h3 className="font-display text-lg font-semibold text-foreground">Behavioral Feedback</h3>
                 </div>
-                <ul className="space-y-2">
-                  {result.suggestions.map((s, i) => (
+                <ul className="space-y-2 ml-2">
+                  {behavioralFeedback.map((s, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <span className="text-primary mt-0.5">→</span>
+                      <span className="text-primary mt-0.5">•</span>
                       {s}
                     </li>
                   ))}
@@ -417,7 +436,7 @@ function generateSummary(result: TestResult, percentage: number, strongTopics: s
   }
 
   if (weakTopics.length > 0) {
-    summary += `However, you need improvement in ${weakTopics.join(", ")}. `;
+    summary += `However, you need improvement in ${weakTopics.join(" and ")}. `;
   }
 
   if (integrityStatus === "Passed") {
@@ -427,6 +446,40 @@ function generateSummary(result: TestResult, percentage: number, strongTopics: s
   }
 
   return summary;
+}
+
+function generateBehavioralFeedback(result: TestResult): string[] {
+  const feedback: string[] = [];
+  const metrics = result.behavioralMetrics;
+
+  if (metrics) {
+    if (metrics.eyeContactScore < 60) {
+      feedback.push("Maintain consistent eye contact with the camera during the assessment");
+      feedback.push("Avoid frequently looking away from the screen during questions");
+    } else if (metrics.eyeContactScore < 80) {
+      feedback.push("Your eye contact was adequate but could be improved — try to focus on the screen consistently");
+    }
+
+    if (metrics.lookingAwayEvents > 2) {
+      feedback.push("Reduce head movements and stay focused on the screen");
+    }
+
+    if (metrics.faceMissingEvents > 1) {
+      feedback.push("Ensure your face is clearly visible to the camera throughout the test");
+      feedback.push("Position yourself properly in front of the webcam before starting");
+    }
+  }
+
+  if (result.integrityScore < 80) {
+    feedback.push("Avoid switching tabs during the assessment");
+    feedback.push("Stay focused on the test screen throughout the duration");
+  }
+
+  if (result.cheatingEvents.filter(e => e.type === "multiple_faces").length > 0) {
+    feedback.push("Ensure you are alone in the room during the assessment");
+  }
+
+  return feedback;
 }
 
 export default ResultsPage;
