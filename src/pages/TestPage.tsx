@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Brain, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MCQQuestion, CheatingEvent, TestResult, TopicResult } from "@/lib/types";
+import { MCQQuestion, CheatingEvent, TestResult, TopicResult, BehavioralMetrics } from "@/lib/types";
 import { generateQuestions } from "@/lib/questionBank";
 import QuestionCard from "@/components/QuestionCard";
 import WebcamMonitor from "@/components/WebcamMonitor";
@@ -16,6 +16,10 @@ const TestPage = () => {
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [cheatingEvents, setCheatingEvents] = useState<CheatingEvent[]>([]);
+  const behavioralMetricsRef = useRef<BehavioralMetrics>({
+    eyeContactScore: 100, totalFrames: 0, eyeContactFrames: 0,
+    lookingAwayEvents: 0, faceMissingEvents: 0, multipleFaceEvents: 0,
+  });
 
   const startTest = () => {
     setPhase("loading");
@@ -24,7 +28,7 @@ const TestPage = () => {
       setQuestions(generated);
       setAnswers({});
       setCheatingEvents([]);
-      setTimeout(() => setPhase("active"), 800); // brief loading feel
+      setTimeout(() => setPhase("active"), 800);
     } catch (err) {
       console.error("Failed to generate questions:", err);
       toast.error("Failed to generate questions. Please try again.");
@@ -34,6 +38,10 @@ const TestPage = () => {
 
   const handleCheatingEvent = useCallback((event: CheatingEvent) => {
     setCheatingEvents((prev) => [...prev, event]);
+  }, []);
+
+  const handleBehavioralUpdate = useCallback((metrics: BehavioralMetrics) => {
+    behavioralMetricsRef.current = metrics;
   }, []);
 
   const submitTest = useCallback(() => {
@@ -53,17 +61,16 @@ const TestPage = () => {
       }
     });
 
-    // Calculate accuracy per topic
     Object.values(topicResults).forEach((r) => {
       r.accuracy = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
     });
 
-    // Integrity calculation
     let integrity = 100;
     cheatingEvents.forEach((e) => {
       if (e.type === "multiple_faces") integrity -= 20;
       else if (e.type === "tab_switch") integrity -= 10;
       else if (e.type === "face_missing") integrity -= 5;
+      else if (e.type === "looking_away") integrity -= 5;
     });
     integrity = Math.max(0, integrity);
 
@@ -71,16 +78,7 @@ const TestPage = () => {
       .filter(([, r]) => r.correct / r.total < 0.5)
       .map(([topic]) => topic);
 
-    const suggestions = weakTopics.map((topic) => {
-      const map: Record<string, string> = {
-        "DSA": "Revise sorting algorithms, trees, graphs, and time complexity analysis",
-        "DBMS": "Review DBMS normalization, SQL queries, and transaction concepts",
-        "OS": "Practice OS concepts — process scheduling, memory management, deadlocks",
-        "Java": "Strengthen Java fundamentals — OOP, collections, exception handling",
-        "Python": "Review Python basics — data types, list comprehension, decorators",
-      };
-      return map[topic] || `Review ${topic} concepts`;
-    });
+    const suggestions = generateSuggestions(weakTopics, topicResults, questions, answers);
 
     const result: TestResult = {
       score,
@@ -93,6 +91,7 @@ const TestPage = () => {
       questions,
       cheatingEvents,
       topicResults,
+      behavioralMetrics: behavioralMetricsRef.current,
     };
 
     navigate("/results", { state: { result } });
@@ -113,7 +112,7 @@ const TestPage = () => {
             </p>
             <ul className="text-left text-sm text-muted-foreground mt-6 space-y-2">
               <li className="flex items-center gap-2"><span className="text-primary">✓</span> Webcam will be enabled automatically</li>
-              <li className="flex items-center gap-2"><span className="text-primary">✓</span> Face detection monitors your session</li>
+              <li className="flex items-center gap-2"><span className="text-primary">✓</span> Face & gaze detection monitors your session</li>
               <li className="flex items-center gap-2"><span className="text-primary">✓</span> Tab switching will be flagged</li>
               <li className="flex items-center gap-2"><span className="text-primary">✓</span> Auto-submit when time runs out</li>
             </ul>
@@ -145,7 +144,6 @@ const TestPage = () => {
       <Navbar />
       <div className="pt-20 pb-8 px-4">
         <div className="container mx-auto">
-          {/* Top bar */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display text-lg font-semibold text-foreground">MCQ Interview</h2>
             <div className="flex items-center gap-4">
@@ -157,7 +155,6 @@ const TestPage = () => {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-            {/* Questions */}
             <div className="space-y-4">
               {questions.map((q, i) => (
                 <QuestionCard
@@ -178,10 +175,13 @@ const TestPage = () => {
               </Button>
             </div>
 
-            {/* Sidebar */}
             <div className="order-first lg:order-last">
               <div className="sticky top-20 space-y-4">
-                <WebcamMonitor isActive={phase === "active"} onCheatingEvent={handleCheatingEvent} />
+                <WebcamMonitor
+                  isActive={phase === "active"}
+                  onCheatingEvent={handleCheatingEvent}
+                  onBehavioralUpdate={handleBehavioralUpdate}
+                />
                 <div className="glass-card p-3">
                   <h4 className="text-xs font-display font-semibold text-foreground mb-2">Activity Log</h4>
                   <div className="max-h-32 overflow-y-auto space-y-1">
@@ -193,6 +193,7 @@ const TestPage = () => {
                           {e.type === "tab_switch" && "⚠ Tab switch detected"}
                           {e.type === "face_missing" && "⚠ Face not detected"}
                           {e.type === "multiple_faces" && "⚠ Multiple faces detected"}
+                          {e.type === "looking_away" && "⚠ Looking away from screen"}
                         </div>
                       ))
                     )}
@@ -206,5 +207,65 @@ const TestPage = () => {
     </div>
   );
 };
+
+function generateSuggestions(
+  weakTopics: string[],
+  topicResults: Record<string, TopicResult>,
+  questions: MCQQuestion[],
+  answers: Record<number, string>
+): string[] {
+  const suggestions: string[] = [];
+
+  const topicSuggestions: Record<string, string[]> = {
+    DSA: [
+      "Review binary search and time complexity concepts",
+      "Practice linked list and tree traversal problems",
+      "Study graph algorithms like BFS and DFS",
+      "Solve at least 5 practice questions on sorting algorithms",
+    ],
+    DBMS: [
+      "Revise database normalization (1NF, 2NF, 3NF, BCNF)",
+      "Practice SQL joins, subqueries, and indexing",
+      "Study transaction management and ACID properties",
+      "Solve practice MCQs on ER diagrams and relational algebra",
+    ],
+    OS: [
+      "Review process scheduling algorithms (FCFS, SJF, Round Robin)",
+      "Study memory management and virtual memory concepts",
+      "Practice deadlock detection and prevention strategies",
+      "Revise file systems and disk scheduling algorithms",
+    ],
+    Java: [
+      "Strengthen OOP concepts — inheritance, polymorphism, abstraction",
+      "Review Java Collections Framework (ArrayList, HashMap, HashSet)",
+      "Practice exception handling and multithreading concepts",
+      "Study JVM architecture and garbage collection",
+    ],
+    Python: [
+      "Review Python data types, list comprehension, and generators",
+      "Practice decorators, context managers, and lambda functions",
+      "Study Python OOP — classes, inheritance, magic methods",
+      "Solve coding problems using Python standard libraries",
+    ],
+  };
+
+  weakTopics.forEach((topic) => {
+    const topicSpecific = topicSuggestions[topic];
+    if (topicSpecific) {
+      // Pick suggestions based on how poorly they did
+      const accuracy = topicResults[topic]?.accuracy ?? 0;
+      const count = accuracy === 0 ? 4 : accuracy < 25 ? 3 : 2;
+      suggestions.push(...topicSpecific.slice(0, count));
+    } else {
+      suggestions.push(`Review ${topic} fundamentals and solve practice problems`);
+    }
+  });
+
+  if (suggestions.length === 0) {
+    suggestions.push("Great performance! Continue practicing to maintain your skills.");
+  }
+
+  return suggestions;
+}
 
 export default TestPage;
