@@ -1,73 +1,183 @@
-# Welcome to your Lovable project
+# HAMII – Hyper Adaptive Modal Interview Intelligence
 
-## Project info
+HAMII is an AI-powered interview and technical assessment platform designed to simulate real interview environments while maintaining exam integrity through intelligent monitoring.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+The system combines computer vision–based proctoring, behavioral monitoring, and real-time session tracking to ensure fair and structured assessments.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+##  Features
 
-**Use Lovable**
+### AI-Proctored Technical Assessment
+- Real-time camera monitoring
+- Face detection with bounding box
+- Single candidate verification
+- Tab-switch detection
+- Integrity scoring system
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Interview Practice Mode
+- Simulated interview environment
+- Camera monitoring during practice
+- Structured interview flow
 
-Changes made via Lovable will be committed automatically to this repo.
+### Exam Integrity Monitoring
+The system continuously monitors candidate behavior to maintain exam integrity.
 
-**Use your preferred IDE**
+Signals monitored include:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Face visibility
+- Multiple people detection
+- Tab switching
+- Candidate leaving the frame
+- Device usage (phone detection planned)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## Integrity Scoring System
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Integrity score represents how compliant the candidate is during the exam.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+The score starts at **100** and gradually decreases when suspicious actions are detected.
 
-# Step 3: Install the necessary dependencies.
-npm i
+Example penalties:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+| Event | Penalty |
+|------|------|
+| Face not detected | -20 |
+| Multiple faces detected | -40 |
+| Looking away frequently | -20 |
+| Tab switching | -25 |
+
+
+Integrity decreases gradually instead of dropping instantly.  
+If suspicious behavior continues for the entire duration, the score may reach **0**.
+
+---
+
+##  AI Technologies Used
+
+### Computer Vision
+MediaPipe Vision Tasks
+
+Used for:
+- Face detection
+- Bounding box tracking
+- Real-time candidate verification
+
+### Proctoring Signals
+Browser monitoring is used to detect:
+
+- Tab switching
+- Page focus loss
+- Session interruptions
+
+### Monitoring Pipeline
+
+Camera Feed  
+→ Face Detection  
+→ Behavioral Signals  
+→ Integrity Score Calculation
+
+---
+
+##  Pre-Exam Verification
+
+Before the exam begins, the system verifies:
+
+- Camera access
+- Face detection
+- Bounding box stability
+- Single candidate presence
+
+The **exam timer starts only after the bounding box detects a face successfully**.
+
+---
+
+##  Technology Stack
+
+Frontend
+- React
+- TypeScript
+- Vite
+
+AI / Computer Vision
+- MediaPipe Vision Tasks
+- TensorFlow.js (for future extensions)
+
+Backend
+- Supabase
+
+Deployment
+- Vercel
+
+---
+
+##  Project Structure
+
+```
+src
+ ├── components
+ ├── pages
+ │    ├── Index.tsx
+ │    ├── Practice.tsx
+ │    └── Results.tsx
+ ├── lib
+ │    ├── visionAnalysis.ts
+ │    ├── audioAnalysis.ts
+ │    └── fusionAlgorithm.ts
+ └── integrations
+      └── supabase
+```
+
+---
+
+##  Running the Project Locally
+
+Install dependencies
+
+```
+npm install
+```
+
+Start development server
+
+```
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open the application in browser
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+http://localhost:5173
+```
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Deployment
 
-## What technologies are used for this project?
+The project is deployed using **Vercel**.
 
-This project is built with:
+Redeploy using Vercel CLI:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+vercel --prod
+```
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+##  Future Improvements
 
-## Can I connect a custom domain to my Lovable project?
+Planned enhancements include:
 
-Yes, you can!
+- Phone detection using object detection models
+- Gaze tracking
+- Emotion recognition
+- Gesture analysis
+- Behavioral anomaly detection
+- Deep learning–based proctoring models
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+
+
