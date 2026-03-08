@@ -55,6 +55,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
   // Integrity tracking
   const cumulativePenalty = useRef(0);
   const smoothedIntegrity = useRef(100);
+  const eventCounts = useRef<Record<string, number>>({});
 
   // Throttle
   const lastDetectionTime = useRef(0);
