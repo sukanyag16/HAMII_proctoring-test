@@ -11,7 +11,7 @@ interface WebcamMonitorProps {
 const SMOOTHING_THRESHOLD = 10; // consecutive frames before triggering
 const GAZE_LEFT_THRESHOLD = 0.35;
 const GAZE_RIGHT_THRESHOLD = 0.65;
-const LOOKING_AWAY_TIMEOUT_MS = 3000;
+const LOOKING_AWAY_TIMEOUT_MS = 7000;
 
 const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate }: WebcamMonitorProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);

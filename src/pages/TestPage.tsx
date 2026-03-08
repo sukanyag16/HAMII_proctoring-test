@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Brain, Loader2, Play } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MCQQuestion, CheatingEvent, TestResult, TopicResult, BehavioralMetrics } from "@/lib/types";
 import { generateQuestions } from "@/lib/questionBank";
@@ -8,11 +8,12 @@ import QuestionCard from "@/components/QuestionCard";
 import WebcamMonitor from "@/components/WebcamMonitor";
 import TestTimer from "@/components/TestTimer";
 import Navbar from "@/components/Navbar";
+import PreExamSetup from "@/components/PreExamSetup";
 import { toast } from "sonner";
 
 const TestPage = () => {
   const navigate = useNavigate();
-  const [phase, setPhase] = useState<"idle" | "loading" | "active" | "submitting">("idle");
+  const [phase, setPhase] = useState<"setup" | "loading" | "active" | "submitting">("setup");
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [cheatingEvents, setCheatingEvents] = useState<CheatingEvent[]>([]);
@@ -32,7 +33,7 @@ const TestPage = () => {
     } catch (err) {
       console.error("Failed to generate questions:", err);
       toast.error("Failed to generate questions. Please try again.");
-      setPhase("idle");
+      setPhase("setup");
     }
   };
 
@@ -97,29 +98,12 @@ const TestPage = () => {
     navigate("/results", { state: { result } });
   }, [phase, questions, answers, cheatingEvents, navigate]);
 
-  if (phase === "idle") {
+  if (phase === "setup") {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex min-h-screen items-center justify-center px-6 pt-16">
-          <div className="glass-card max-w-lg w-full p-8 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mx-auto mb-6">
-              <Brain className="h-8 w-8 text-primary" />
-            </div>
-            <h2 className="font-display text-2xl font-bold text-foreground">MCQ Interview Test</h2>
-            <p className="text-muted-foreground mt-3 text-sm">
-              20 topic-wise questions • 15 minutes • Proctored with webcam
-            </p>
-            <ul className="text-left text-sm text-muted-foreground mt-6 space-y-2">
-              <li className="flex items-center gap-2"><span className="text-primary">✓</span> Webcam will be enabled automatically</li>
-              <li className="flex items-center gap-2"><span className="text-primary">✓</span> Face & gaze detection monitors your session</li>
-              <li className="flex items-center gap-2"><span className="text-primary">✓</span> Tab switching will be flagged</li>
-              <li className="flex items-center gap-2"><span className="text-primary">✓</span> Auto-submit when time runs out</li>
-            </ul>
-            <Button onClick={startTest} size="lg" className="mt-8 w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 font-semibold">
-              <Play className="h-4 w-4" /> Start Test
-            </Button>
-          </div>
+          <PreExamSetup onReady={startTest} />
         </div>
       </div>
     );
