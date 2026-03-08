@@ -174,6 +174,7 @@ const TestPage = () => {
                           {e.type === "face_missing" && "⚠ Face not detected"}
                           {e.type === "multiple_faces" && "⚠ Multiple faces detected"}
                           {e.type === "looking_away" && "⚠ Looking away from screen"}
+                          {e.type === "phone_detected" && "⚠ Phone detected in frame"}
                         </div>
                       ))
                     )}
