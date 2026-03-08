@@ -6,17 +6,18 @@ export interface MCQQuestion {
 }
 
 export interface CheatingEvent {
-  type: "tab_switch" | "face_missing" | "multiple_faces" | "looking_away";
+  type: "tab_switch" | "face_missing" | "multiple_faces" | "looking_away" | "phone_detected";
   timestamp: number;
 }
 
 export interface BehavioralMetrics {
-  eyeContactScore: number; // percentage of time with eye contact
+  eyeContactScore: number;
   totalFrames: number;
   eyeContactFrames: number;
   lookingAwayEvents: number;
   faceMissingEvents: number;
   multipleFaceEvents: number;
+  phoneDetectedEvents: number;
 }
 
 export interface TopicResult {
