@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Brain, Loader2, Play } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MCQQuestion, CheatingEvent, TestResult, TopicResult, BehavioralMetrics } from "@/lib/types";
 import { generateQuestions } from "@/lib/questionBank";
@@ -8,11 +8,12 @@ import QuestionCard from "@/components/QuestionCard";
 import WebcamMonitor from "@/components/WebcamMonitor";
 import TestTimer from "@/components/TestTimer";
 import Navbar from "@/components/Navbar";
+import PreExamSetup from "@/components/PreExamSetup";
 import { toast } from "sonner";
 
 const TestPage = () => {
   const navigate = useNavigate();
-  const [phase, setPhase] = useState<"idle" | "loading" | "active" | "submitting">("idle");
+  const [phase, setPhase] = useState<"setup" | "loading" | "active" | "submitting">("setup");
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [cheatingEvents, setCheatingEvents] = useState<CheatingEvent[]>([]);
@@ -32,7 +33,7 @@ const TestPage = () => {
     } catch (err) {
       console.error("Failed to generate questions:", err);
       toast.error("Failed to generate questions. Please try again.");
-      setPhase("idle");
+      setPhase("setup");
     }
   };
 
