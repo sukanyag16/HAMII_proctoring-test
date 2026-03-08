@@ -17,14 +17,15 @@ const LOOKING_AWAY_TIMEOUT_MS = 7000;
 const PHONE_TIMEOUT_MS = 2000;
 const DETECTION_INTERVAL_MS = 180; // throttle detection
 
-// Penalty weights
-const PENALTY = {
-  face_missing: 5,
-  multiple_faces: 10,
-  looking_away: 5,
-  phone_detected: 10,
-  tab_switch: 5,
+// Base penalty weights (escalate on repeat)
+const BASE_PENALTY = {
+  face_missing: 8,
+  multiple_faces: 15,
+  looking_away: 8,
+  phone_detected: 15,
+  tab_switch: 10,
 };
+const ESCALATION_FACTOR = 1.5; // each repeat multiplies penalty
 
 const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegrityUpdate }: WebcamMonitorProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
