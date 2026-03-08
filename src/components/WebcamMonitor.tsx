@@ -71,12 +71,15 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     phoneDetectedEvents: 0,
   });
 
-  const applyPenalty = useCallback((type: keyof typeof PENALTY) => {
-    const pen = PENALTY[type];
+  const applyPenalty = useCallback((type: keyof typeof BASE_PENALTY) => {
+    // Escalate: each repeat of same type increases penalty
+    const count = (eventCounts.current[type] || 0) + 1;
+    eventCounts.current[type] = count;
+    const pen = Math.round(BASE_PENALTY[type] * Math.pow(ESCALATION_FACTOR, Math.min(count - 1, 4)));
     cumulativePenalty.current += pen;
     const rawIntegrity = Math.max(0, 100 - cumulativePenalty.current);
-    // Exponential smoothing
-    smoothedIntegrity.current = Math.round(0.9 * smoothedIntegrity.current + 0.1 * rawIntegrity);
+    // Less aggressive smoothing: 0.5 lets penalties hit faster
+    smoothedIntegrity.current = Math.round(0.5 * smoothedIntegrity.current + 0.5 * rawIntegrity);
     const newScore = Math.max(0, Math.min(100, smoothedIntegrity.current));
     setIntegrityScore(newScore);
     onIntegrityUpdate?.(newScore);
