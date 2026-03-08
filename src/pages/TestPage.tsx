@@ -17,9 +17,10 @@ const TestPage = () => {
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [cheatingEvents, setCheatingEvents] = useState<CheatingEvent[]>([]);
+  const [liveIntegrity, setLiveIntegrity] = useState(100);
   const behavioralMetricsRef = useRef<BehavioralMetrics>({
     eyeContactScore: 100, totalFrames: 0, eyeContactFrames: 0,
-    lookingAwayEvents: 0, faceMissingEvents: 0, multipleFaceEvents: 0,
+    lookingAwayEvents: 0, faceMissingEvents: 0, multipleFaceEvents: 0, phoneDetectedEvents: 0,
   });
 
   const startTest = () => {
@@ -66,14 +67,8 @@ const TestPage = () => {
       r.accuracy = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
     });
 
-    let integrity = 100;
-    cheatingEvents.forEach((e) => {
-      if (e.type === "multiple_faces") integrity -= 20;
-      else if (e.type === "tab_switch") integrity -= 10;
-      else if (e.type === "face_missing") integrity -= 5;
-      else if (e.type === "looking_away") integrity -= 5;
-    });
-    integrity = Math.max(0, integrity);
+    // Use the live integrity score from WebcamMonitor
+    const integrity = Math.max(0, liveIntegrity);
 
     const weakTopics = Object.entries(topicResults)
       .filter(([, r]) => r.correct / r.total < 0.5)
@@ -96,7 +91,7 @@ const TestPage = () => {
     };
 
     navigate("/results", { state: { result } });
-  }, [phase, questions, answers, cheatingEvents, navigate]);
+  }, [phase, questions, answers, cheatingEvents, liveIntegrity, navigate]);
 
   if (phase === "setup") {
     return (
@@ -128,13 +123,13 @@ const TestPage = () => {
       <Navbar />
       <div className="pt-20 pb-8 px-4">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-lg font-semibold text-foreground">MCQ Interview</h2>
-            <div className="flex items-center gap-4">
+          {/* Centered Timer */}
+          <div className="flex flex-col items-center mb-6">
+            <TestTimer durationMinutes={15} isActive={phase === "active"} onTimeUp={submitTest} />
+            <div className="flex items-center gap-4 mt-2">
               <span className="text-sm text-muted-foreground">
                 {Object.keys(answers).length}/{questions.length} answered
               </span>
-              <TestTimer durationMinutes={15} isActive={phase === "active"} onTimeUp={submitTest} />
             </div>
           </div>
 
@@ -165,6 +160,7 @@ const TestPage = () => {
                   isActive={phase === "active"}
                   onCheatingEvent={handleCheatingEvent}
                   onBehavioralUpdate={handleBehavioralUpdate}
+                  onIntegrityUpdate={(score) => setLiveIntegrity(score)}
                 />
                 <div className="glass-card p-3">
                   <h4 className="text-xs font-display font-semibold text-foreground mb-2">Activity Log</h4>
@@ -178,6 +174,7 @@ const TestPage = () => {
                           {e.type === "face_missing" && "⚠ Face not detected"}
                           {e.type === "multiple_faces" && "⚠ Multiple faces detected"}
                           {e.type === "looking_away" && "⚠ Looking away from screen"}
+                          {e.type === "phone_detected" && "⚠ Phone detected in frame"}
                         </div>
                       ))
                     )}

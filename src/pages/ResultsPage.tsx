@@ -104,10 +104,12 @@ const ResultsPage = () => {
     const multiFaces = result.cheatingEvents.filter((e) => e.type === "multiple_faces").length;
     const faceMissing = result.cheatingEvents.filter((e) => e.type === "face_missing").length;
     const lookingAway = result.cheatingEvents.filter((e) => e.type === "looking_away").length;
-    if (tabSwitches > 0) { doc.text(`• Tab Switches: ${tabSwitches} (-10 each)`, 22, y); y += 6; }
-    if (multiFaces > 0) { doc.text(`• Multiple Faces: ${multiFaces} (-20 each)`, 22, y); y += 6; }
+    if (tabSwitches > 0) { doc.text(`• Tab Switches: ${tabSwitches} (-5 each)`, 22, y); y += 6; }
+    if (multiFaces > 0) { doc.text(`• Multiple Faces: ${multiFaces} (-10 each)`, 22, y); y += 6; }
     if (faceMissing > 0) { doc.text(`• Face Missing: ${faceMissing} (-5 each)`, 22, y); y += 6; }
     if (lookingAway > 0) { doc.text(`• Looking Away: ${lookingAway} (-5 each)`, 22, y); y += 6; }
+    const phoneEvents = result.cheatingEvents.filter((e) => e.type === "phone_detected").length;
+    if (phoneEvents > 0) { doc.text(`• Phone Detected: ${phoneEvents} (-10 each)`, 22, y); y += 6; }
     y += 4;
 
     // 4. Topic-wise Performance
@@ -251,10 +253,11 @@ const ResultsPage = () => {
               {result.cheatingEvents.length > 0 && (
                 <div className="mt-4 space-y-1">
                   {[
-                    { type: "tab_switch" as const, label: "Tab switches", penalty: "-10 each" },
-                    { type: "multiple_faces" as const, label: "Multiple faces", penalty: "-20 each" },
+                    { type: "tab_switch" as const, label: "Tab switches", penalty: "-5 each" },
+                    { type: "multiple_faces" as const, label: "Multiple faces", penalty: "-10 each" },
                     { type: "face_missing" as const, label: "Face missing", penalty: "-5 each" },
                     { type: "looking_away" as const, label: "Looking away", penalty: "-5 each" },
+                    { type: "phone_detected" as const, label: "Phone detected", penalty: "-10 each" },
                   ].map(({ type, label, penalty }) => {
                     const count = result.cheatingEvents.filter((e) => e.type === type).length;
                     if (count === 0) return null;
