@@ -17,9 +17,10 @@ const TestPage = () => {
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [cheatingEvents, setCheatingEvents] = useState<CheatingEvent[]>([]);
+  const [liveIntegrity, setLiveIntegrity] = useState(100);
   const behavioralMetricsRef = useRef<BehavioralMetrics>({
     eyeContactScore: 100, totalFrames: 0, eyeContactFrames: 0,
-    lookingAwayEvents: 0, faceMissingEvents: 0, multipleFaceEvents: 0,
+    lookingAwayEvents: 0, faceMissingEvents: 0, multipleFaceEvents: 0, phoneDetectedEvents: 0,
   });
 
   const startTest = () => {
