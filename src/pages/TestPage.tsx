@@ -67,14 +67,8 @@ const TestPage = () => {
       r.accuracy = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
     });
 
-    let integrity = 100;
-    cheatingEvents.forEach((e) => {
-      if (e.type === "multiple_faces") integrity -= 20;
-      else if (e.type === "tab_switch") integrity -= 10;
-      else if (e.type === "face_missing") integrity -= 5;
-      else if (e.type === "looking_away") integrity -= 5;
-    });
-    integrity = Math.max(0, integrity);
+    // Use the live integrity score from WebcamMonitor
+    const integrity = Math.max(0, liveIntegrity);
 
     const weakTopics = Object.entries(topicResults)
       .filter(([, r]) => r.correct / r.total < 0.5)
@@ -97,7 +91,7 @@ const TestPage = () => {
     };
 
     navigate("/results", { state: { result } });
-  }, [phase, questions, answers, cheatingEvents, navigate]);
+  }, [phase, questions, answers, cheatingEvents, liveIntegrity, navigate]);
 
   if (phase === "setup") {
     return (
