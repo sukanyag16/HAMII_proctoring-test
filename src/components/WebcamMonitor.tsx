@@ -213,7 +213,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
                 applyPenalty("phone_detected");
                 phoneTimerRef.current = null;
                 // Reset after a cooldown
-                setTimeout(() => { phoneTriggered.current = false; }, 5000);
+                setTimeout(() => { phoneTriggered.current = false; }, 3000);
               }, PHONE_TIMEOUT_MS);
             }
           } else {
