@@ -123,13 +123,13 @@ const TestPage = () => {
       <Navbar />
       <div className="pt-20 pb-8 px-4">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-lg font-semibold text-foreground">MCQ Interview</h2>
-            <div className="flex items-center gap-4">
+          {/* Centered Timer */}
+          <div className="flex flex-col items-center mb-6">
+            <TestTimer durationMinutes={15} isActive={phase === "active"} onTimeUp={submitTest} />
+            <div className="flex items-center gap-4 mt-2">
               <span className="text-sm text-muted-foreground">
                 {Object.keys(answers).length}/{questions.length} answered
               </span>
-              <TestTimer durationMinutes={15} isActive={phase === "active"} onTimeUp={submitTest} />
             </div>
           </div>
 
@@ -160,6 +160,7 @@ const TestPage = () => {
                   isActive={phase === "active"}
                   onCheatingEvent={handleCheatingEvent}
                   onBehavioralUpdate={handleBehavioralUpdate}
+                  onIntegrityUpdate={(score) => setLiveIntegrity(score)}
                 />
                 <div className="glass-card p-3">
                   <h4 className="text-xs font-display font-semibold text-foreground mb-2">Activity Log</h4>
