@@ -1,7 +1,7 @@
 # HAMII – Hyper Adaptive Modal Interview Intelligence
 
 HAMII is an AI-powered interview and technical assessment platform designed to simulate real interview environments while maintaining exam integrity through intelligent monitoring.
-Link: hamii.vercel.app
+
 This system combines computer vision–based proctoring, behavioral monitoring, and real-time session tracking to ensure fair and structured assessments.
 
 
