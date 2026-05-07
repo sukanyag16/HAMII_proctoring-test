@@ -90,16 +90,16 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     smoothedIntegrity.current = Math.round(0.5 * smoothedIntegrity.current + 0.5 * rawIntegrity);
     const newScore = Math.max(0, Math.min(100, smoothedIntegrity.current));
     setIntegrityScore(newScore);
-    onIntegrityUpdate?.(newScore);
-  }, [onIntegrityUpdate]);
+    onIntegrityUpdateRef.current?.(newScore);
+  }, []);
 
   const updateMetrics = useCallback(() => {
     const m = metricsRef.current;
     m.eyeContactScore = m.totalFrames > 0
       ? Math.round((m.eyeContactFrames / m.totalFrames) * 100)
       : 100;
-    onBehavioralUpdate?.({ ...m });
-  }, [onBehavioralUpdate]);
+    onBehavioralUpdateRef.current?.({ ...m });
+  }, []);
 
   useEffect(() => {
     if (!isActive) return;
