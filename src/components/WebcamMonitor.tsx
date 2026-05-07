@@ -354,7 +354,9 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
       if (lookingAwayTimerRef.current) clearTimeout(lookingAwayTimerRef.current);
       if (phoneTimerRef.current) clearTimeout(phoneTimerRef.current);
     };
-  }, [isActive, onCheatingEvent, updateMetrics, applyPenalty]);
+    // Only re-run when isActive changes — prevents camera blink/restart on re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   if (!isActive) return null;
 
