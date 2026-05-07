@@ -71,6 +71,14 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     phoneDetectedEvents: 0,
   });
 
+  // Stabilize callbacks via refs so the camera effect doesn't restart on parent re-render
+  const onCheatingEventRef = useRef(onCheatingEvent);
+  const onBehavioralUpdateRef = useRef(onBehavioralUpdate);
+  const onIntegrityUpdateRef = useRef(onIntegrityUpdate);
+  useEffect(() => { onCheatingEventRef.current = onCheatingEvent; }, [onCheatingEvent]);
+  useEffect(() => { onBehavioralUpdateRef.current = onBehavioralUpdate; }, [onBehavioralUpdate]);
+  useEffect(() => { onIntegrityUpdateRef.current = onIntegrityUpdate; }, [onIntegrityUpdate]);
+
   const applyPenalty = useCallback((type: keyof typeof BASE_PENALTY) => {
     // Escalate: each repeat of same type increases penalty
     const count = (eventCounts.current[type] || 0) + 1;
