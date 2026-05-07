@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 const stats = [
   { value: "95%+", label: "Face Detection Accuracy" },
   { value: "<100ms", label: "Detection Latency" },
-  { value: "15", label: "Dynamic MCQs" },
+  { value: "20", label: "Dynamic MCQs" },
   { value: "$0", label: "Cost to Start" },
 ];
 

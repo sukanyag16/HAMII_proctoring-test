@@ -71,6 +71,14 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     phoneDetectedEvents: 0,
   });
 
+  // Stabilize callbacks via refs so the camera effect doesn't restart on parent re-render
+  const onCheatingEventRef = useRef(onCheatingEvent);
+  const onBehavioralUpdateRef = useRef(onBehavioralUpdate);
+  const onIntegrityUpdateRef = useRef(onIntegrityUpdate);
+  useEffect(() => { onCheatingEventRef.current = onCheatingEvent; }, [onCheatingEvent]);
+  useEffect(() => { onBehavioralUpdateRef.current = onBehavioralUpdate; }, [onBehavioralUpdate]);
+  useEffect(() => { onIntegrityUpdateRef.current = onIntegrityUpdate; }, [onIntegrityUpdate]);
+
   const applyPenalty = useCallback((type: keyof typeof BASE_PENALTY) => {
     // Escalate: each repeat of same type increases penalty
     const count = (eventCounts.current[type] || 0) + 1;
@@ -82,16 +90,16 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     smoothedIntegrity.current = Math.round(0.5 * smoothedIntegrity.current + 0.5 * rawIntegrity);
     const newScore = Math.max(0, Math.min(100, smoothedIntegrity.current));
     setIntegrityScore(newScore);
-    onIntegrityUpdate?.(newScore);
-  }, [onIntegrityUpdate]);
+    onIntegrityUpdateRef.current?.(newScore);
+  }, []);
 
   const updateMetrics = useCallback(() => {
     const m = metricsRef.current;
     m.eyeContactScore = m.totalFrames > 0
       ? Math.round((m.eyeContactFrames / m.totalFrames) * 100)
       : 100;
-    onBehavioralUpdate?.({ ...m });
-  }, [onBehavioralUpdate]);
+    onBehavioralUpdateRef.current?.({ ...m });
+  }, []);
 
   useEffect(() => {
     if (!isActive) return;
@@ -208,7 +216,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
                 phoneTriggered.current = true;
                 setFaceStatus("phone");
                 setWarning("Phone detected in frame");
-                onCheatingEvent({ type: "phone_detected", timestamp: Date.now() });
+                onCheatingEventRef.current({ type: "phone_detected", timestamp: Date.now() });
                 metricsRef.current.phoneDetectedEvents++;
                 applyPenalty("phone_detected");
                 phoneTimerRef.current = null;
@@ -236,7 +244,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
           faceMissingTriggered.current = true;
           setFaceStatus("missing");
           setWarning("Face not detected");
-          onCheatingEvent({ type: "face_missing", timestamp: Date.now() });
+          onCheatingEventRef.current({ type: "face_missing", timestamp: Date.now() });
           metricsRef.current.faceMissingEvents++;
           applyPenalty("face_missing");
         }
@@ -251,7 +259,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
           multipleFaceTriggered.current = true;
           setFaceStatus("detected");
           setWarning("Multiple faces detected");
-          onCheatingEvent({ type: "multiple_faces", timestamp: Date.now() });
+          onCheatingEventRef.current({ type: "multiple_faces", timestamp: Date.now() });
           metricsRef.current.multipleFaceEvents++;
           applyPenalty("multiple_faces");
         }
@@ -294,7 +302,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
               setWarning("Looking away from screen");
               lookingAwayTimerRef.current = setTimeout(() => {
                 lookingAwayTriggered.current = true;
-                onCheatingEvent({ type: "looking_away", timestamp: Date.now() });
+                onCheatingEventRef.current({ type: "looking_away", timestamp: Date.now() });
                 metricsRef.current.lookingAwayEvents++;
                 applyPenalty("looking_away");
                 lookingAwayTimerRef.current = null;
@@ -333,7 +341,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     const handleVisibility = () => {
       if (document.hidden) {
         setWarning("Tab switch detected!");
-        onCheatingEvent({ type: "tab_switch", timestamp: Date.now() });
+        onCheatingEventRef.current({ type: "tab_switch", timestamp: Date.now() });
         applyPenalty("tab_switch");
       }
     };
@@ -346,7 +354,9 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
       if (lookingAwayTimerRef.current) clearTimeout(lookingAwayTimerRef.current);
       if (phoneTimerRef.current) clearTimeout(phoneTimerRef.current);
     };
-  }, [isActive, onCheatingEvent, updateMetrics, applyPenalty]);
+    // Only re-run when isActive changes — prevents camera blink/restart on re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
 
   if (!isActive) return null;
 
