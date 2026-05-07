@@ -216,7 +216,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
                 phoneTriggered.current = true;
                 setFaceStatus("phone");
                 setWarning("Phone detected in frame");
-                onCheatingEvent({ type: "phone_detected", timestamp: Date.now() });
+                onCheatingEventRef.current({ type: "phone_detected", timestamp: Date.now() });
                 metricsRef.current.phoneDetectedEvents++;
                 applyPenalty("phone_detected");
                 phoneTimerRef.current = null;
@@ -244,7 +244,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
           faceMissingTriggered.current = true;
           setFaceStatus("missing");
           setWarning("Face not detected");
-          onCheatingEvent({ type: "face_missing", timestamp: Date.now() });
+          onCheatingEventRef.current({ type: "face_missing", timestamp: Date.now() });
           metricsRef.current.faceMissingEvents++;
           applyPenalty("face_missing");
         }
@@ -259,7 +259,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
           multipleFaceTriggered.current = true;
           setFaceStatus("detected");
           setWarning("Multiple faces detected");
-          onCheatingEvent({ type: "multiple_faces", timestamp: Date.now() });
+          onCheatingEventRef.current({ type: "multiple_faces", timestamp: Date.now() });
           metricsRef.current.multipleFaceEvents++;
           applyPenalty("multiple_faces");
         }
@@ -302,7 +302,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
               setWarning("Looking away from screen");
               lookingAwayTimerRef.current = setTimeout(() => {
                 lookingAwayTriggered.current = true;
-                onCheatingEvent({ type: "looking_away", timestamp: Date.now() });
+                onCheatingEventRef.current({ type: "looking_away", timestamp: Date.now() });
                 metricsRef.current.lookingAwayEvents++;
                 applyPenalty("looking_away");
                 lookingAwayTimerRef.current = null;
@@ -341,7 +341,7 @@ const WebcamMonitor = ({ isActive, onCheatingEvent, onBehavioralUpdate, onIntegr
     const handleVisibility = () => {
       if (document.hidden) {
         setWarning("Tab switch detected!");
-        onCheatingEvent({ type: "tab_switch", timestamp: Date.now() });
+        onCheatingEventRef.current({ type: "tab_switch", timestamp: Date.now() });
         applyPenalty("tab_switch");
       }
     };
